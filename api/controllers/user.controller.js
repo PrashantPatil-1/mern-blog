@@ -1,3 +1,3 @@
-export const test = (req,res) => {
-    res.json({msg:'hello'})
-}
+// export const test = (req,res) => {
+    // res.json({msg:'hello'})
+// }
