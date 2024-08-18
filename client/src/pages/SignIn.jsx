@@ -6,7 +6,6 @@ import {
   signInSuccess,
   signInFailure,
 } from "../redux/user/userSlice";
-
 import { useDispatch, useSelector } from "react-redux";
 import OAuth from "../components/OAuth";
 
@@ -19,6 +18,7 @@ function SignIn() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() }); // trim is used to remove blank spaces
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault(); // its not refresh our page after click on submit button
     if (!formData.email || !formData.password) {
@@ -32,17 +32,18 @@ function SignIn() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      if (data.success === false) {
+      if (!res.ok) {
         dispatch(signInFailure(data.message));
-      }
-      if (res.ok) {
-        dispatch(signInSuccess(data));
+      } else {
+        dispatch(signInSuccess(data.user));
+        localStorage.setItem("access_token", data.access_token);
         navigate("/");
       }
     } catch (error) {
       dispatch(signInFailure(error.message));
     }
   };
+
   return (
     <div className="min-h-screen mt-20">
       <div className="flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-5">
@@ -75,7 +76,7 @@ function SignIn() {
             <div className="">
               <Label value="Your password" />
               <TextInput
-                type="text"
+                type="password"
                 placeholder="**********"
                 id="password"
                 onChange={handleChange}
@@ -94,7 +95,7 @@ function SignIn() {
                 "Sign In"
               )}
             </Button>
-            <OAuth/>
+            <OAuth />
           </form>
           <div className="flex gap-2 text-sm mt-5">
             <span>Don't Have an account ?</span>
