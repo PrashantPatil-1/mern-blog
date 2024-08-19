@@ -6,15 +6,8 @@ import jwt from "jsonwebtoken";
 export const signup = async (req, res, next) => {
   const { username, email, password } = req.body;
 
-  if (
-    !username ||
-    !password ||
-    !email ||
-    username === "" ||
-    password === "" ||
-    email === ""
-  ) {
-    next(errorHandler(400, "ALl fields are required"));
+  if (!username || !password || !email) {
+    return next(errorHandler(400, "All fields are required"));
   }
 
   const hashedPassword = bcryptjs.hashSync(password, 10);
@@ -36,8 +29,8 @@ export const signup = async (req, res, next) => {
 export const signin = async (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password || email === "" || password === "") {
-    next(errorHandler(400, "All fields are required"));
+  if (!email || !password) {
+    return next(errorHandler(400, "All fields are required"));
   }
 
   try {
@@ -53,7 +46,13 @@ export const signin = async (req, res, next) => {
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
     const { password: pass, ...rest } = validUser._doc;
 
-    res.status(200).json({ access_token: token, user: rest });
+    res
+      .cookie("access_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+      })
+      .status(200)
+      .json({ user: rest });
   } catch (error) {
     next(error);
   }
